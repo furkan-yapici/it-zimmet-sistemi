@@ -5,6 +5,7 @@ import { z } from "zod";
 import { config } from "../config";
 import { HttpError } from "../lib/errors";
 import { prisma } from "../lib/prisma";
+import { userSelect } from "../lib/selects";
 import { authenticate } from "../middleware/auth";
 
 const router = Router();
@@ -17,15 +18,6 @@ const loginSchema = z.object({
     .email("Geçerli bir e-posta adresi girin"),
   password: z.string({ error: "Şifre gerekli" }).min(1, "Şifre gerekli"),
 });
-
-const userSelect = {
-  id: true,
-  fullName: true,
-  email: true,
-  role: true,
-  createdAt: true,
-  department: { select: { id: true, name: true } },
-} as const;
 
 // Kullanıcı bulunamasa da bcrypt çalıştırılır; yanıt süresiyle e-posta var mı yok mu anlaşılmasın
 const DUMMY_HASH = bcrypt.hashSync("dummy-password", 10);

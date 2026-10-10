@@ -19,9 +19,14 @@
   - Frontend: React Router, `sonner` toast kütüphanesi, giriş sayfası, oturum yönetimi (AuthContext), korumalı rota (`ProtectedRoute`, rol parametresi destekli) ve çıkış butonu olan basit ana sayfa.
   - Test edildi: temiz bir veritabanından `docker compose up --build` ile migration + seed otomatik çalıştı; login (doğru/yanlış şifre, geçersiz girdi), `/me`, logout, rol kontrolü (admin 200, personel 403, süresi dolmuş/sahte/silinmiş kullanıcı token'ı 401) ve tarayıcıda giriş → yenileme → çıkış akışı doğrulandı.
 
+- [x] **Aşama 3: Kullanıcı yönetimi**
+  - Backend (hepsi sadece ADMIN): `GET /api/users` (`{ data, meta }`, `page`, `limit`, `search`, `departmentId` destekli), `POST /api/users`, `PATCH /api/users/:id`, `PUT /api/users/:id/password`, `DELETE /api/users/:id` ve form için `GET /api/departments`.
+  - Kurallar: e-posta benzersiz ve küçük harfe çevrilerek kaydedilir; şifre en az 8 karakter; admin kendi hesabını silemez ve kendi rolünü değiştiremez; üzerinde açık zimmeti veya zimmet/işlem geçmişi olan kullanıcı silinemez. Tüm hata mesajları Türkçe `{ message }` biçiminde.
+  - Frontend: yan menülü (telefonda açılır menü) ana iskelet (`AppLayout`), yalnızca admin'e görünen "Kullanıcılar" sayfası: tablo, ekle/düzenle formu, şifre sıfırlama penceresi, silme onay penceresi, her işlemde toast.
+  - Test edildi: API (yetki, doğrulama, benzersiz e-posta, kendini silme/düşürme, açık zimmetli ve geçmişi olan kullanıcıyı silme, Türkçe karakterler); tarayıcıda ekleme, düzenleme (çakışan e-posta hatası dahil), şifre sıfırlama (yeni şifreyle giriş), silme (onay penceresi ve zimmetli kullanıcı reddi), personel için menü gizleme ve `/users` yönlendirmesi, telefon genişliğinde açılır menü.
+
 ## Kalan işler
 
-- [ ] Aşama 3: Kullanıcı yönetimi (admin CRUD)
 - [ ] Aşama 4: Envanter + QR (cihaz CRUD, assetTag, QR üretimi)
 - [ ] Aşama 5: Zimmet + geçmiş (zimmetleme, iade, arıza bildirme, ActivityLog, Zimmetlerim)
 - [ ] Aşama 6: Liste özellikleri (sayfalama, arama, filtreler, toast)
@@ -34,7 +39,11 @@
 
 - Cihaz türü (`DeviceType`) veritabanında İngilizce anahtarlarla tutuluyor (`COMPUTER`, `MONITOR`, `SERVER`, `PRINTER`, `OTHER`); arayüzde Türkçe etiketleri (Bilgisayar, Monitör, Sunucu, Yazıcı, Diğer) gösterilecek.
 - Logout stateless: JWT sunucuda saklanmadığı için çıkışta istemci token'ı siler; `POST /api/auth/logout` sadece onay mesajı döner.
-- Ana sayfa şimdilik sadece karşılama bilgisi gösteriyor; Dashboard Aşama 7'de, menü/yan panel sayfalar eklendikçe gelecek.
+- Ana sayfa şimdilik sadece karşılama bilgisi gösteriyor; Dashboard Aşama 7'de gelecek. Menüye sayfalar eklendikçe bağlantılar eklenecek.
+- Kullanıcılar sayfası şimdilik en fazla 100 kullanıcıyı tek listede gösteriyor; arama kutusu, filtre ve sayfalama arayüzü Aşama 6'da eklenecek (API bunları şimdiden destekliyor).
+- Zimmet geçmişi olan kullanıcı silinemez (kayıtlar silinmez kuralı). Silinen kullanıcı için "pasif yapma" ayrı bir karar olarak ertelendi.
+- Windows'ta Docker bind mount dosya değişikliklerini container'a bildirmediği için dosyalar düzenli aralıkla kontrol ediliyor: frontend'de Vite `usePolling`, backend'de `nodemon --legacy-watch`. Kod değişince sunucu kendiliğinden yenilenir (seed yeniden çalışmaz). Yeni bağımlılık, Prisma şeması veya migration değişirse `docker compose up -d --build -V backend` gerekir.
+- Seed yalnızca veritabanında hiç kullanıcı yokken (ilk kurulumda) çalışır; kullanıcı varsa "seed atlandı" der ve hiçbir veriye dokunmaz. Demo veriyi baştan yüklemek için `docker compose down -v` ile veritabanı hacmi silinip yeniden başlatılmalı.
 - Backend Docker'da `src/generated/prisma` altına Prisma istemcisini üretiyor; bu klasör git'e girmiyor (`.gitignore`).
 - Docker'da `node_modules` anonim volume'de tutuluyor; yeni bağımlılık eklendikten sonra `docker compose up --build -V` kullanılmalı.
 - Yerel (Docker'sız) çalıştırma için `DATABASE_URL` içindeki `db` host adı `localhost` ile değiştirilmeli (README'de anlatılacak).

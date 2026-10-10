@@ -45,6 +45,12 @@ function requiredEnv(name: string): string {
 }
 
 async function main() {
+  const existingUsers = await prisma.user.count();
+  if (existingUsers > 0) {
+    console.log("Veritabanında zaten kullanıcı var, seed atlandı.");
+    return;
+  }
+
   const adminEmail = requiredEnv("ADMIN_EMAIL").toLowerCase();
   const adminPassword = requiredEnv("ADMIN_PASSWORD");
   const staffPassword = requiredEnv("SEED_STAFF_PASSWORD");

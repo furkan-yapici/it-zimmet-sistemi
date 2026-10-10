@@ -7,5 +7,7 @@ export default defineConfig({
   server: {
     host: true,
     port: 5173,
+    // Docker + Windows'ta dosya değişikliği bildirimi gelmediği için dosyalar düzenli aralıkla kontrol edilir
+    watch: { usePolling: true, interval: 300 },
   },
 })
