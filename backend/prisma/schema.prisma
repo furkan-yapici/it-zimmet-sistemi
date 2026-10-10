@@ -1,0 +1,107 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN
+  STAFF
+}
+
+enum DeviceType {
+  COMPUTER
+  MONITOR
+  SERVER
+  PRINTER
+  OTHER
+}
+
+enum DeviceStatus {
+  IN_STOCK
+  IN_USE
+  BROKEN
+  RETIRED
+}
+
+enum ActivityAction {
+  CREATED
+  UPDATED
+  ASSIGNED
+  RETURNED
+  STATUS_CHANGED
+  FAULT_REPORTED
+}
+
+model Department {
+  id    Int    @id @default(autoincrement())
+  name  String @unique
+  users User[]
+}
+
+model User {
+  id           Int      @id @default(autoincrement())
+  fullName     String
+  email        String   @unique
+  passwordHash String
+  role         Role     @default(STAFF)
+  departmentId Int
+  createdAt    DateTime @default(now())
+
+  department          Department    @relation(fields: [departmentId], references: [id])
+  assignments         Assignment[]  @relation("AssignedTo")
+  madeAssignments     Assignment[]  @relation("AssignedBy")
+  performedActivities ActivityLog[]
+}
+
+model Device {
+  id              Int          @id @default(autoincrement())
+  assetTag        String       @unique
+  type            DeviceType
+  brand           String
+  model           String
+  serialNumber    String       @unique
+  purchaseDate    DateTime
+  warrantyEndDate DateTime?
+  status          DeviceStatus @default(IN_STOCK)
+  notes           String?
+  createdAt       DateTime     @default(now())
+
+  assignments Assignment[]
+  activities  ActivityLog[]
+}
+
+model Assignment {
+  id           Int       @id @default(autoincrement())
+  deviceId     Int
+  userId       Int
+  assignedById Int
+  assignedAt   DateTime  @default(now())
+  returnedAt   DateTime?
+  note         String?
+
+  device     Device @relation(fields: [deviceId], references: [id])
+  user       User   @relation("AssignedTo", fields: [userId], references: [id])
+  assignedBy User   @relation("AssignedBy", fields: [assignedById], references: [id])
+
+  @@index([deviceId])
+  @@index([userId])
+}
+
+model ActivityLog {
+  id            Int            @id @default(autoincrement())
+  deviceId      Int
+  action        ActivityAction
+  performedById Int
+  details       String?
+  createdAt     DateTime       @default(now())
+
+  device      Device @relation(fields: [deviceId], references: [id])
+  performedBy User   @relation(fields: [performedById], references: [id])
+
+  @@index([deviceId])
+}

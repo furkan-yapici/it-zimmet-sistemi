@@ -29,6 +29,7 @@ services:
       JWT_EXPIRES_IN: ${JWT_EXPIRES_IN}
       ADMIN_EMAIL: ${ADMIN_EMAIL}
       ADMIN_PASSWORD: ${ADMIN_PASSWORD}
+      SEED_STAFF_PASSWORD: ${SEED_STAFF_PASSWORD}
     ports:
       - "${PORT:-3001}:3001"
     volumes:
