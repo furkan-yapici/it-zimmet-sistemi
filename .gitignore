@@ -1,0 +1,30 @@
+# Ortam değişkenleri
+.env
+.env.local
+
+# Bağımlılıklar
+node_modules/
+**/node_modules/
+
+# Build çıktıları
+dist/
+build/
+**/dist/
+**/build/
+
+# Prisma
+backend/prisma/migrations/dev.db
+
+# Loglar
+*.log
+npm-debug.log*
+
+# Editör / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Mobil (Expo)
+mobile/.expo/
+mobile/node_modules/
